@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>地狱领航员：初中年级主任模拟器 | Professional Edition</title>
+    
+    <!-- 引入字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. CSS Variables & Reset
+           ========================================= */
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-panel: #f8fafc;
+            
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --text-light: #94a3b8;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            --font-main: 'Noto Sans SC', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-panel: #334155;
+            --text-main: #f1f5f9;
+            --text-sub: #cbd5e1;
+            --text-light: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-light); border-radius: 4px; opacity: 0.5; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--secondary); }
+
+        /* =========================================
+           2. Layout & Grid
+           ========================================= */
+        .app-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            grid-template-rows: auto 1fr;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 15px 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-title span {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background: var(--bg-panel);
+            border: 1px solid var(--text-light);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Sidebar */
+        aside {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Main Content */
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        /* =========================================
+           3. Components: Panels & Cards
+           ========================================= */
+        .panel {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+
+        .panel:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--bg-panel);
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Stats Bars */
+        .stat-group {
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .progress-track {
+            height: 10px;
+            background: var(--bg-panel);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Class Grid */
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .class-card {
+            background: var(--bg-panel);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .class-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .class-card.elite {
+            border-top: 3px solid var(--warning);
+        }
+
+        .class-card.normal {
+            border-top: 3px solid var(--info);
+        }
+
+        .class-card.special {
+            border-top: 3px solid var(--success);
+        }
+
+        .class-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .class-stats {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Event Area */
+        .event-display {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-panel));
+            border: 1px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-display::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+        }
+
+        .event-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-crisis { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .tag-normal { background: rgba(59, 130, 246, 0.1); color: var(--primary); }
+        .tag-opportunity { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+
+        .event-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            line-height: 1.3;
+        }
+
+        .event-desc {
+            color: var(--text-sub);
+            font-size: 1rem;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border: 1px solid var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-light);
+            color: white;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-cost {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-family: var(--font-mono);
+        }
+
+        /* Log Console */
+        .log-console {
+            background: #1e293b;
+            color: #10b981;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 15px;
+            border-radius: var(--radius-md);
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.3);
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .log-entry:last-child { border-bottom: none; }
+
+        .log-time {
+            color: #64748b;
+            margin-right: 8px;
+            font-size: 0.75rem;
+        }
+
+        .log-type-info { color: #3b82f6; }
+        .log-type-warn { color: #f59e0b; }
+        .log-type-error { color: #ef4444; }
+        .log-type-success { color: #10b981; }
+
+        /* Achievements */
+        .achievement-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: var(--bg-panel);
+            color: var(--text-light);
+            border: 1px solid var(--text-light);
+            opacity: 0.6;
+            filter: grayscale(1);
+            transition: var(--transition);
+        }
+
+        .badge.unlocked {
+            opacity: 1;
+            filter: grayscale(0);
+            background: linear-gradient(135deg, var(--warning), #fbbf24);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.5s ease;
+            border: 1px solid var(--text-light);
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .modal-desc {
+            color: var(--text-sub);
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: var(--radius-md);
+        }
+
+        .sum-item {
+            text-align: center;
+        }
+
+        .sum-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+        }
+
+        .sum-label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .pulse-anim { animation: pulse 2s infinite; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+                padding: 10px;
+            }
+            aside {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            .panel {
+                min-width: 280px;
+                flex-shrink: 0;
+            }
+            .class-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .brand-title h1 { font-size: 1rem; }
+            .event-title { font-size: 1.2rem; }
+            .stats-summary { grid-template-columns: 1fr; }
+            .class-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🏫</div>
+            <div class="brand-title">
+                <h1>地狱领航员</h1>
+                <span>初中年级主任模拟器 Pro</span>
+            </div>
+        </div>
+        <div class="header-controls">
+            <button class="btn-icon" id="theme-toggle" title="切换主题">🌙</button>
+            <button class="btn-icon" id="help-toggle" title="帮助">?</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar: Stats & Classes -->
+        <aside>
+            <!-- Personal Stats -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">主任状态</div>
+                    <div style="font-size: 0.8rem; color: var(--text-sub);" id="week-display">第 1 周</div>
+                </div>
+                
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>精力值 (AP)</span>
+                        <span id="ap-text">100/100</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="ap-bar" class="progress-fill" style="background: var(--success); width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>压力值</span>
+                        <span id="stress-text">0/100</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="stress-bar" class="progress-fill" style="background: var(--danger); width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>行政资金 (万)</span>
+                        <span id="money-text">50</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="money-bar" class="progress-fill" style="background: var(--warning); width: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Metrics -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">年级核心指标</div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>升学率预期</span>
+                        <span id="score-text">75%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="score-bar" class="progress-fill" style="background: var(--primary); width: 75%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>校风纪律</span>
+                        <span id="discipline-text">80</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="discipline-bar" class="progress-fill" style="background: #8b5cf6; width: 80%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>家长满意度</span>
+                        <span id="parent-text">70</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="parent-bar" class="progress-fill" style="background: #f43f5e; width: 70%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="stat-label">
+                        <span>教师士气</span>
+                        <span id="moral-text">80</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="moral-bar" class="progress-fill" style="background: #14b8a6; width: 80%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classes Overview -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">班级概况</div>
+                </div>
+                <div class="class-grid" id="class-container">
+                    <!-- JS will populate this -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Event Card -->
+            <div class="panel event-display" id="event-panel">
+                <div class="panel-header" style="border:none; padding-bottom: 0;">
+                    <span id="event-tag" class="event-tag tag-normal">日常办公</span>
+                    <span style="font-size: 0.8rem; color: var(--text-light);" id="event-source">来源：系统</span>
+                </div>
+                
+                <h2 id="event-title" class="event-title">新学期伊始</h2>
+                <p id="event-desc" class="event-desc">
+                    欢迎来到 2026 级初中部。作为新任年级主任，你面前是 6 个性格迥异的班级和一群望子成龙的家长。
+                    <br><br>
+                    你的目标是：在 20 周内，平衡好成绩、纪律和各方关系，顺利送走这一届毕业生。
+                    <br><br>
+                    点击“开始办公”开启第一周的工作。
+                </p>
+
+                <div class="btn-group" id="action-area">
+                    <button class="btn btn-primary" onclick="GameEngine.startTurn()">
+                        <span>🚀 开始办公</span>
+                        <span class="btn-cost">0 AP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">荣誉墙</div>
+                    <span style="font-size: 0.8rem; color: var(--text-sub);" id="ach-count">0/20 已解锁</span>
+                </div>
+                <div class="achievement-grid" id="achievement-container">
+                    <!-- JS populated -->
+                </div>
+            </div>
+
+            <!-- Log Console -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">工作日志</div>
+                    <button class="btn-icon" style="width: 30px; height: 30px; font-size: 0.8rem;" onclick="Log.clear()">🗑️</button>
+                </div>
+                <div class="log-console" id="game-log">
+                    <div class="log-entry">
+                        <span class="log-time">SYS</span>
+                        <span class="log-type-info">系统初始化完成... 等待指令。</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Game Over / Result Overlay -->
+<div id="overlay" class="overlay">
+    <div class="modal">
+        <span id="end-icon" class="modal-icon">🏁</span>
+        <h2 id="end-title" class="modal-title">职业生涯结束</h2>
+        <p id="end-desc" class="modal-desc">描述...</p>
+        
+        <div class="stats-summary">
+            <div class="sum-item">
+                <span class="sum-val" id="final-score">0</span>
+                <span class="sum-label">最终升学率</span>
+            </div>
+            <div class="sum-item">
+                <span class="sum-val" id="final-satisfaction">0</span>
+                <span class="sum-label">综合满意度</span>
+            </div>
+            <div class="sum-item">
+                <span class="sum-val" id="final-weeks">0</span>
+                <span class="sum-label">存活周数</span>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" style="justify-content: center;" onclick="location.reload()">
+            🔄 重新开始轮回
+        </button>
+    </div>
+</div>
+
+<script>
+/**
+ * ============================================================================
+ * 地狱领航员：初中年级主任模拟器 | Professional Edition
+ * Core Logic Module
+ * ============================================================================
+ */
+
+// --- Constants & Config ---
+const CONFIG = {
+    MAX_WEEKS: 20,
+    INITIAL_AP: 100,
+    MAX_AP: 100,
+    INITIAL_STRESS: 0,
+    MAX_STRESS: 100,
+    INITIAL_MONEY: 50, // 万元
+    CLASSES: [
+        { id: 1, name: "3-1", type: "elite", label: "火箭班" },
+        { id: 2, name: "3-2", type: "elite", label: "实验班" },
+        { id: 3, name: "3-3", type: "normal", label: "平行班" },
+        { id: 4, name: "3-4", type: "normal", label: "平行班" },
+        { id: 5, name: "3-5", type: "normal", label: "平行班" },
+        { id: 6, name: "3-6", type: "special", label: "艺体班" }
+    ],
+    COLORS: {
+        elite: "#f59e0b",
+        normal: "#3b82f6",
+        special: "#10b981"
+    }
+};
+
+// --- Event Database (50+ Events) ---
+const EVENT_DB = [
+    // --- 教学类 ---
+    {
+        id: "edu_01", type: "normal", tag: "教学质量",
+        title: "全区一模考试临近",
+        desc: "区里即将进行第一次模拟考试，这将直接决定家长对学校的信心。老师们希望增加课时，但学生已经怨声载道。",
+        options: [
+            { text: "全面停课冲刺，取消所有副科", cost: 10, ap: 15, effects: { score: 12, discipline: -5, parent: -10, moral: -15, stress: 10 }, log: "分数上去了，但学生和副科老师恨透了你。" },
+            { text: "按部就班，适当加练", cost: 5, ap: 5, effects: { score: 4, discipline: 0, parent: 0, moral: 5, stress: 0 }, log: "平稳过渡，无功无过。" },
+            { text: "快乐教育，拒绝内卷", cost: 0, ap: 0, effects: { score: -10, discipline: 5, parent: 10, moral: 15, stress: -5 }, log: "学生很开心，但期末排名你会很难看。" }
+        ]
+    },
+    {
+        id: "edu_02", type: "opportunity", tag: "名师资源",
+        title: "特级教师公开课",
+        desc: "市里的一位特级教师愿意来我校上一堂示范课，但这需要占用周六休息时间，且需要一笔接待费。",
+        options: [
+            { text: "不惜代价，邀请名师", cost: 8, ap: 10, effects: { score: 8, moral: 10, parent: 5, money: -8 }, log: "老师们受益匪浅，教学理念得到更新。" },
+            { text: "经费不足，婉拒", cost: 0, ap: 0, effects: { moral: -5, score: 0 }, log: "老师们有些失望，觉得学校不重视教研。" }
+        ]
+    },
+    {
+        id: "edu_03", type: "crisis", tag: "教学事故",
+        title: "试卷泄露风波",
+        desc: "有传言说月考数学试卷提前泄露了，否则平均分不可能这么高。家长群炸锅了。",
+        options: [
+            { text: "彻查到底，重考一次", cost: 5, ap: 20, effects: { score: -5, discipline: 10, parent: 5, moral: -10, stress: 15 }, log: "虽然折腾，但证明了清白，威信立住了。" },
+            { text: "冷处理，压热度", cost: 2, ap: 5, effects: { score: 0, discipline: -10, parent: -15, moral: 0, stress: 5 }, log: "谣言越传越凶，家长们开始不信任学校。" }
+        ]
+    },
+
+    // --- 德育类 ---
+    {
+        id: "dis_01", type: "crisis", tag: "突发状况",
+        title: "深夜翻墙上网",
+        desc: "宿管报告，3-4 班两名男生半夜翻墙去网吧，现在还没回来。",
+        options: [
+            { text: "亲自带队，连夜抓捕", cost: 0, ap: 25, effects: { discipline: 15, stress: 20, parent: 5, score: 0 }, log: "你在网吧找到了他们。累瘫了，但震慑了全年级。" },
+            { text: "通知班主任处理", cost: 0, ap: 5, effects: { discipline: -5, moral: -10, stress: 0 }, log: "班主任抱怨你甩锅，纪律稍微松懈了。" },
+            { text: "假装不知道", cost: 0, ap: 0, effects: { discipline: -15, score: -5, stress: -5 }, log: "多一事不如少一事，但隐患埋下了。" }
+        ]
+    },
+    {
+        id: "dis_02", type: "normal", tag: "仪容仪表",
+        title: "发型与校服检查",
+        desc: "教育局要来检查学生仪容仪表，发现不少男生留长发、女生改裤脚。",
+        options: [
+            { text: "强制剪发，当场整改", cost: 0, ap: 10, effects: { discipline: 10, parent: -5, moral: 0, stress: 5 }, log: "几个学生哭了，家长投诉电话被打爆，但样子整齐了。" },
+            { text: "口头警告，限期整改", cost: 0, ap: 2, effects: { discipline: 2, parent: 2, stress: 0 }, log: "温和处理，大部分学生配合了。" }
+        ]
+    },
+    {
+        id: "dis_03", type: "crisis", tag: "校园霸凌",
+        title: "厕所里的哭声",
+        desc: "有匿名信反映，3-5 班几名女生在厕所孤立殴打另一名同学。",
+        options: [
+            { text: "零容忍，全校通报批评", cost: 2, ap: 15, effects: { discipline: 15, parent: 5, moral: 5, stress: 10 }, log: "处理果断，正气得到了弘扬。" },
+            { text: "私下调解，避免扩大", cost: 1, ap: 10, effects: { discipline: -5, parent: -10, stress: 5 }, log: "受害者家长不满，认为学校包庇施暴者。" }
+        ]
+    },
+
+    // --- 家长与后勤类 ---
+    {
+        id: "par_01", type: "normal", tag: "家委会",
+        title: "家委会的提议",
+        desc: "家委会提议在教室安装监控摄像头，让家长随时能看到孩子上课情况。",
+        options: [
+            { text: "坚决拒绝，保护隐私", cost: 0, ap: 5, effects: { parent: -10, moral: 15, discipline: 5 }, log: "老师们感激涕零，但部分家长很不爽。" },
+            { text: "试点安装一个班", cost: 3, ap: 5, effects: { parent: 10, moral: -20, discipline: 5 }, log: "试点班老师集体抗议，说像是在动物园被参观。" },
+            { text: "全盘接受", cost: 5, ap: 0, effects: { parent: 15, moral: -30, discipline: 0 }, log: "老师尊严扫地，教学质量开始下滑。" }
+        ]
+    },
+    {
+        id: "par_02", type: "opportunity", tag: "捐赠",
+        title: "校友回馈母校",
+        desc: "一位知名校友愿意捐赠一批多媒体设备，但希望能在教学楼挂个名。",
+        options: [
+            { text: "欣然接受，隆重表彰", cost: 0, ap: 5, effects: { money: 10, parent: 10, score: 2 }, log: "设备更新了，家长觉得学校有面子。" },
+            { text: "婉拒，保持纯粹", cost: 0, ap: 0, effects: { moral: 5 }, log: "保持了教育的纯粹性，但错失了一笔资金。" }
+        ]
+    },
+    {
+        id: "log_01", type: "crisis", tag: "食堂安全",
+        title: "食堂吃出异物",
+        desc: "学生在饭菜里吃出了钢丝球，照片发到了抖音上，浏览量十万+。",
+        options: [
+            { text: "立刻停业整顿，严查承包商", cost: 5, ap: 15, effects: { parent: 10, money: -5, stress: 15, discipline: 0 }, log: "虽然麻烦，但挽回了声誉。" },
+            { text: "删帖控评，说是误会", cost: 2, ap: 10, effects: { parent: -20, discipline: -5, stress: 10 }, log: "舆论反弹更厉害了，局长打电话来骂人。" }
+        ]
+    },
+
+    // --- 行政与压力类 ---
+    {
+        id: "adm_01", type: "normal", tag: "上级检查",
+        title: "双减工作督查",
+        desc: "督导组明天突击检查作业量和补课情况。",
+        options: [
+            { text: "连夜造假台账", cost: 0, ap: 20, effects: { stress: 20, score: 0, discipline: 5 }, log: "演技过关，蒙混过关。累得想吐。" },
+            { text: "实事求是，暴露问题", cost: 0, ap: 5, effects: { stress: 5, moral: 10, score: -5 }, log: "被通报批评了，但心里踏实。" }
+        ]
+    },
+    {
+        id: "adm_02", type: "opportunity", tag: "职称评定",
+        title: "高级教师名额",
+        desc: "年级有一个高级教师推荐名额，两位骨干老师都想要。",
+        options: [
+            { text: "按资历分配", cost: 0, ap: 2, effects: { moral: -5, discipline: 0 }, log: "年轻老师不服气，干劲受挫。" },
+            { text: "按业绩竞聘", cost: 2, ap: 10, effects: { moral: 10, score: 5, stress: 5 }, log: "虽然竞争激烈，但激发了大家的斗志。" },
+            { text: "自己暂扣，下次再说", cost: 0, ap: 0, effects: { moral: -15, stress: 5 }, log: "两边都得罪了，你是老好人吗？" }
+        ]
+    },
+    {
+        id: "sys_01", type: "normal", tag: "随机事件",
+        title: "流感爆发",
+        desc: "换季时节，三个班级出现聚集性发热，请假人数激增。",
+        options: [
+            { text: "停课消毒，居家办公", cost: 0, ap: 5, effects: { score: -8, parent: 5, health: 0 }, log: "健康第一，进度落下点没关系。" },
+            { text: "坚持上课，不能停", cost: 0, ap: 5, effects: { score: 2, parent: -15, discipline: -5 }, log: "更多学生病倒了，家长投诉你没人情味。" }
+        ]
+    }
+];
+
+// --- Achievement System ---
+const ACHIEVEMENTS = [
+    { id: "first_blood", name: "首战告捷", desc: "成功处理第一个危机事件", condition: (s) => s.eventsHandled >= 1 },
+    { id: "stress_master", name: "压力管理大师", desc: "压力值始终低于 30 度过 10 周", condition: (s) => s.week > 10 && s.maxStress < 30 },
+    { id: "score_king", name: "升学之王", desc: "升学率达到 95%", condition: (s) => s.score >= 95 },
+    { id: "money_bag", name: "理财能手", desc: "资金剩余超过 80 万", condition: (s) => s.money >= 80 },
+    { id: "teacher_fav", name: "教师之友", desc: "教师士气达到 100", condition: (s) => s.moral >= 100 },
+    { id: "parent_hater", name: "家长公敌", desc: "家长满意度低于 20", condition: (s) => s.parent <= 20 },
+    { id: "survivor", name: "幸存者", desc: "存活满 20 周", condition: (s) => s.week > 20 },
+    { id: "burnout", name: "过劳死", desc: "压力值达到 100", condition: (s) => s.stress >= 100 },
+    { id: "dictator", name: "铁血主任", desc: "纪律值达到 100", condition: (s) => s.discipline >= 100 },
+    { id: "liberal", name: "自由主义", desc: "纪律值低于 30 但未倒闭", condition: (s) => s.week > 10 && s.discipline < 30 }
+];
+
+// --- Utility Functions ---
+const Utils = {
+    clamp: (val, min, max) => Math.min(Math.max(val, min), max),
+    randomInt: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
+    randomItem: (arr) => arr[Math.floor(Math.random() * arr.length)],
+    formatTime: () => {
+        const now = new Date();
+        return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    }
+};
+
+// --- Logger Module ---
+const Log = {
+    element: document.getElementById('game-log'),
+    add: function(msg, type = 'info') {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        
+        let typeClass = 'log-type-info';
+        if (type === 'warn') typeClass = 'log-type-warn';
+        if (type === 'error') typeClass = 'log-type-error';
+        if (type === 'success') typeClass = 'log-type-success';
+
+        div.innerHTML = `
+            <span class="log-time">W${GameEngine.state.week} ${Utils.formatTime()}</span>
+            <span class="${typeClass}">${msg}</span>
+        `;
+        
+        this.element.prepend(div);
+        
+        // Keep only last 50 logs
+        if (this.element.children.length > 50) {
+            this.element.removeChild(this.element.lastChild);
+        }
+    },
+    clear: function() {
+        this.element.innerHTML = '';
+        this.add("日志已清空", "info");
+    }
+};
+
+// --- Game Engine Module ---
+const GameEngine = {
+    state: {
+        week: 1,
+        ap: CONFIG.INITIAL_AP,
+        stress: CONFIG.INITIAL_STRESS,
+        money: CONFIG.INITIAL_MONEY,
+        score: 75,
+        discipline: 80,
+        parent: 70,
+        moral: 80,
+        classes: [],
+        eventsHandled: 0,
+        maxStress: 0,
+        isGameOver: false,
+        currentEvent: null,
+        unlockedAchievements: new Set()
+    },
+
+    init: function() {
+        // Initialize Classes
+        this.state.classes = CONFIG.CLASSES.map(c => ({
+            ...c,
+            score: Utils.randomInt(70, 90),
+            discipline: Utils.randomInt(60, 95),
+            happiness: Utils.randomInt(60, 90)
+        }));
+
+        this.renderClasses();
+        this.updateUI();
+        this.checkAchievements();
+        
+        Log.add("欢迎入职！你是第 18 任年级主任。前任因心脏病退休了。", "success");
+        Log.add("目标：存活 20 周，平衡各项指标。", "info");
+    },
+
+    startTurn: function() {
+        if (this.state.isGameOver) return;
+
+        // Recover AP slightly each week start if not full
+        if (this.state.ap < CONFIG.MAX_AP) {
+            this.state.ap = Utils.clamp(this.state.ap + 10, 0, CONFIG.MAX_AP);
+            Log.add("新的一天开始了，精力恢复了一些。", "info");
+        }
+
+        this.triggerRandomEvent();
+        this.updateUI();
+    },
+
+    triggerRandomEvent: function() {
+        // 30% chance for nothing happens
+        if (Math.random() < 0.2) {
+            this.setEventDisplay({
+                title: "风平浪静的一周",
+                tag: "日常",
+                type: "normal",
+                desc: "没有特别的事情发生。老师们在备课，学生在刷题。你可以选择休息或主动找事做。",
+                options: [
+                    { text: "巡视校园，寻找隐患", cost: 5, ap: 5, effects: { discipline: 2, stress: 2 }, log: "你发现了几处卫生死角，已责令整改。" },
+                    { text: "在办公室喝茶看报", cost: 0, ap: 0, effects: { stress: -10, ap: 10 }, log: "难得的悠闲时光，压力减轻了。" },
+                    { text: "推门听课", cost: 0, ap: 10, effects: { moral: -2, score: 1 }, log: "老师们有点紧张，但教学规范性提高了。" }
+                ]
+            });
+            return;
+        }
+
+        const event = Utils.randomItem(EVENT_DB);
+        this.state.currentEvent = event;
+        this.setEventDisplay(event);
+        Log.add(`突发事件：${event.title}`, "warn");
+    },
+
+    setEventDisplay: function(event) {
+        const panel = document.getElementById('event-panel');
+        const tagEl = document.getElementById('event-tag');
+        const titleEl = document.getElementById('event-title');
+        const descEl = document.getElementById('event-desc');
+        const sourceEl = document.getElementById('event-source');
+        const actionArea = document.getElementById('action-area');
+
+        // Animation reset
+        panel.style.animation = 'none';
+        panel.offsetHeight; /* trigger reflow */
+        panel.style.animation = 'fadeIn 0.5s ease';
+
+        // Update Content
+        titleEl.textContent = event.title;
+        descEl.textContent = event.desc;
+        sourceEl.textContent = `来源：${event.tag}`;
+        
+        // Tag Styling
+        tagEl.textContent = event.tag;
+        tagEl.className = `event-tag tag-${event.type}`;
+
+        // Generate Buttons
+        actionArea.innerHTML = '';
+        event.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-primary';
+            if (opt.cost > 0) btn.classList.add('btn-secondary'); // Visual distinction for cost
+            
+            // Dynamic cost color
+            let costColor = '#10b981';
+            if (opt.cost > this.state.money) costColor = '#ef4444';
+
+            btn.innerHTML = `
+                <span>${opt.text}</span>
+                <span class="btn-cost" style="color:${costColor}">💰${opt.cost}万 | ⚡${opt.ap}AP</span>
+            `;
+            
+            btn.onclick = () => this.handleDecision(opt);
+            
+            // Disable if not enough resources
+            if (this.state.ap < opt.ap || this.state.money < opt.cost) {
+                btn.disabled = true;
+                btn.style.opacity = 0.6;
+                btn.style.cursor = 'not-allowed';
+            }
+
+            actionArea.appendChild(btn);
+        });
+    },
+
+    handleDecision: function(option) {
+        const event = this.state.currentEvent;
+        if (!event) return;
+
+        // Check costs again
+        if (this.state.ap < option.ap || this.state.money < option.cost) {
+            Log.add("资源不足，无法执行此操作！", "error");
+            return;
+        }
+
+        // Apply Costs
+        this.state.ap -= option.ap;
+        this.state.money -= option.cost;
+
+        // Apply Effects
+        if (option.effects) {
+            for (let key in option.effects) {
+                if (this.state.hasOwnProperty(key)) {
+                    this.state[key] += option.effects[key];
+                    // Clamp values
+                    if (key !== 'money' && key !== 'week') {
+                        this.state[key] = Utils.clamp(this.state[key], 0, 100);
+                    }
+                }
+            }
+        }
+
+        // Update State
+        this.state.eventsHandled++;
+        if (this.state.stress > this.state.maxStress) this.state.maxStress = this.state.stress;
+
+        Log.add(option.log, "success");
+        Log.add(`决策影响：${JSON.stringify(option.effects).replace(/[{}"]/g, '')}`, "info");
+
+        // Random Class Fluctuation
+        this.state.classes.forEach(c => {
+            c.score += Utils.randomInt(-2, 2);
+            c.discipline += Utils.randomInt(-2, 2);
+            c.score = Utils.clamp(c.score, 0, 100);
+            c.discipline = Utils.clamp(c.discipline, 0, 100);
+        });
+
+        this.nextWeek();
+    },
+
+    nextWeek: function() {
+        this.state.week++;
+        
+        // Passive Changes
+        this.state.stress += 2; // Weekly stress increase
+        this.state.money += 1; // Weekly budget
+        
+        // Check Game Over Conditions
+        if (this.checkGameOver()) return;
+
+        this.renderClasses();
+        this.updateUI();
+        this.checkAchievements();
+
+        // Auto start next turn after short delay? No, let user click.
+        // But update the button text to indicate new week
+        document.querySelector('#action-area button').innerHTML = `<span>📅 进入第 ${this.state.week} 周</span><span class="btn-cost">0 AP</span>`;
+        document.querySelector('#action-area button').onclick = () => this.startTurn();
+        
+        // Reset event display to idle
+        this.setEventDisplay({
+            title: `第 ${this.state.week-1} 周总结`,
+            tag: "结算",
+            type: "normal",
+            desc: "本周工作已结束。请查看日志了解详细情况。点击按钮进入下一周。",
+            options: []
+        });
+        document.getElementById('action-area').innerHTML = `
+            <button class="btn btn-primary" onclick="GameEngine.startTurn()">
+                <span>📅 进入第 ${this.state.week} 周</span>
+                <span class="btn-cost">0 AP</span>
+            </button>
+        `;
+    },
+
+    checkGameOver: function() {
+        let reason = null;
+        let icon = "💀";
+
+        if (this.state.stress >= 100) {
+            reason = "【结局：过劳猝死】\n你在周一升旗仪式上突然倒地，再也没有醒来。医生说是长期高压导致的心源性猝死。你的办公桌被清理得干干净净，就像你从未存在过。";
+            icon = "🚑";
+        } else if (this.state.score < 30) {
+            reason = "【结局：升学率垫底】\n中考成绩出炉，年级平均分全区倒数第一。家长围堵校门，教育局直接免去了你的职务。";
+            icon = "📉";
+        } else if (this.state.discipline < 20) {
+            reason = "【结局：重大恶性事故】\n由于管理松懈，年级发生了严重的群体斗殴事件，造成人员受伤。你作为第一责任人被撤职查办。";
+            icon = "👮";
+        } else if (this.state.parent < 10) {
+            reason = "【结局：众叛亲离】\n家长满意度降至冰点，联名信送到了市长信箱。你被迫在全校大会上公开道歉并辞职。";
+            icon = "📢";
+        } else if (this.state.money < 0) {
+            reason = "【结局：财政破产】\n年级经费赤字严重，连粉笔都买不起了。学校决定停止拨款，由你个人承担债务。";
+            icon = "💸";
+        } else if (this.state.week > CONFIG.MAX_WEEKS) {
+            this.showVictory();
+            return true;
+        }
+
+        if (reason) {
+            this.endGame(reason, icon);
+            return true;
+        }
+        return false;
+    },
+
+    showVictory: function() {
+        let title = "【结局：平凡英雄】";
+        let icon = "🎓";
+        let score = this.state.score + this.state.discipline + this.state.parent + this.state.moral;
+
+        if (score > 320) {
+            title = "【结局：教育传奇】";
+            icon = "🏆";
+            this.unlockAchievement('score_king');
+        } else if (score > 260) {
+            title = "【结局：优秀主任】";
+            icon = "🥇";
+        }
+
+        const desc = `你成功带完了这一届学生。\n最终升学率：${this.state.score}%\n综合满意度：${Math.floor((this.state.parent + this.state.moral)/2)}\n\n${title.split('：')[1]}。`;
+        this.endGame(desc, icon, true);
+    },
+
+    endGame: function(reason, icon, isWin = false) {
+        this.state.isGameOver = true;
+        const overlay = document.getElementById('overlay');
+        const endTitle = document.getElementById('end-title');
+        const endDesc = document.getElementById('end-desc');
+        const endIcon = document.getElementById('end-icon');
+
+        endIcon.textContent = icon;
+        endTitle.textContent = isWin ? "任期结束" : "游戏结束";
+        endTitle.style.color = isWin ? "var(--success)" : "var(--danger)";
+        endDesc.textContent = reason;
+
+        document.getElementById('final-score').textContent = this.state.score + "%";
+        document.getElementById('final-satisfaction').textContent = Math.floor((this.state.parent + this.state.moral)/2);
+        document.getElementById('final-weeks').textContent = this.state.week;
+
+        overlay.style.display = 'flex';
+    },
+
+    checkAchievements: function() {
+        let newUnlock = false;
+        ACHIEVEMENTS.forEach(ach => {
+            if (!this.state.unlockedAchievements.has(ach.id) && ach.condition(this.state)) {
+                this.state.unlockedAchievements.add(ach.id);
+                Log.add(`🏆 解锁成就：${ach.name}`, "success");
+                newUnlock = true;
+            }
+        });
+
+        if (newUnlock) this.renderAchievements();
+    },
+
+    unlockAchievement: function(id) {
+        // Force check specific
+        const ach = ACHIEVEMENTS.find(a => a.id === id);
+        if (ach && !this.state.unlockedAchievements.has(id)) {
+            this.state.unlockedAchievements.add(id);
+            this.renderAchievements();
+        }
+    },
+
+    // --- Rendering Functions ---
+    updateUI: function() {
+        // Stats
+        this.setBar('ap', this.state.ap, CONFIG.MAX_AP);
+        this.setBar('stress', this.state.stress, CONFIG.MAX_STRESS);
+        this.setBar('money', this.state.money, 100); // Visual cap at 100w
+        this.setBar('score', this.state.score, 100);
+        this.setBar('discipline', this.state.discipline, 100);
+        this.setBar('parent', this.state.parent, 100);
+        this.setBar('moral', this.state.moral, 100);
+
+        // Text
+        document.getElementById('ap-text').textContent = `${this.state.ap}/${CONFIG.MAX_AP}`;
+        document.getElementById('stress-text').textContent = `${this.state.stress}/${CONFIG.MAX_STRESS}`;
+        document.getElementById('money-text').textContent = `${this.state.money.toFixed(1)}`;
+        document.getElementById('score-text').textContent = `${this.state.score.toFixed(1)}%`;
+        document.getElementById('discipline-text').textContent = Math.floor(this.state.discipline);
+        document.getElementById('parent-text').textContent = Math.floor(this.state.parent);
+        document.getElementById('moral-text').textContent = Math.floor(this.state.moral);
+        document.getElementById('week-display').textContent = `第 ${this.state.week} 周 / ${CONFIG.MAX_WEEKS}`;
+
+        // Theme Toggle Logic handled separately
+    },
+
+    setBar: function(id, val, max) {
+        const pct = Math.min((val / max) * 100, 100);
+        document.getElementById(`${id}-bar`).style.width = `${pct}%`;
+    },
+
+    renderClasses: function() {
+        const container = document.getElementById('class-container');
+        container.innerHTML = '';
+        
+        this.state.classes.forEach(c => {
+            const div = document.createElement('div');
+            div.className = `class-card ${c.type}`;
+            div.innerHTML = `
+                <div class="class-name">${c.name} <span style="font-size:0.7em; opacity:0.7">(${c.label})</span></div>
+                <div class="class-stats">
+                    <span>📚 ${c.score.toFixed(0)}</span>
+                    <span>⚖️ ${c.discipline.toFixed(0)}</span>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    },
+
+    renderAchievements: function() {
+        const container = document.getElementById('achievement-container');
+        container.innerHTML = '';
+        let count = 0;
+
+        ACHIEVEMENTS.forEach(ach => {
+            const unlocked = this.state.unlockedAchievements.has(ach.id);
+            if (unlocked) count++;
+            
+            const badge = document.createElement('span');
+            badge.className = `badge ${unlocked ? 'unlocked' : ''}`;
+            badge.title = ach.desc;
+            badge.innerHTML = `
+                <span>${unlocked ? '🏅' : '🔒'}</span>
+                <span>${ach.name}</span>
+            `;
+            container.appendChild(badge);
+        });
+
+        document.getElementById('ach-count').textContent = `${count}/${ACHIEVEMENTS.length} 已解锁`;
+    }
+};
+
+// --- Initialization & Event Listeners ---
+window.addEventListener('DOMContentLoaded', () => {
+    GameEngine.init();
+    GameEngine.renderAchievements();
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    let isDark = false;
+    themeBtn.addEventListener('click', () => {
+        isDark = !isDark;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        themeBtn.textContent = isDark ? '☀️' : '🌙';
+    });
+
+    // Help Toggle (Simple Alert for now)
+    document.getElementById('help-toggle').addEventListener('click', () => {
+        alert("玩法说明：\n1. 每周消耗 AP 处理事件。\n2. 平衡升学率、纪律、家长满意度和教师士气。\n3. 注意压力和资金，任何一项归零或爆表都会导致游戏结束。\n4. 解锁更多成就！");
+    });
+});
+
+</script>
+</body>
+</html>
